@@ -72,10 +72,7 @@
   const token = localStorage.getItem("token");
 
   // 🔥 Detect environment
-  const API =
-    window.location.hostname === "127.0.0.1"
-      ? "https://myapp-smoky-seven.vercel.app" // 👈 CHANGE THIS
-      : "";
+  const API = "https://myapp-smoky-seven.vercel.app"; 
 
   if (!token) {
     window.location.href = "/";
