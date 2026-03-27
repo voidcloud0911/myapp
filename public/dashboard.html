@@ -28,10 +28,18 @@
     <!-- MAIN -->
     <main class="main">
 
-      <!-- TOP -->
+      <!-- HEADER -->
       <header class="top">
         <h1>Dashboard</h1>
-        <p id="welcome">Loading...</p>
+
+        <!-- USER INFO -->
+        <div class="user-info">
+          <div class="avatar">👤</div>
+          <div>
+            <h3 id="usernameDisplay">Loading...</h3>
+            <p id="welcome">Welcome back</p>
+          </div>
+        </div>
       </header>
 
       <!-- CARDS -->
@@ -69,48 +77,65 @@
   </div>
 
   <script>
-const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-// ✅ ALWAYS use real API
-const API = "https://myapp-smoky-seven.vercel.app/dashboard.html";
+    // ✅ CORRECT API
+    const API = "https://myapp-smoky-seven.vercel.app";
 
-if (!token) {
-  window.location.href = "/";
-}
-
-async function loadUser() {
-  try {
-    const res = await fetch(API + "/api/me", {
-      headers: {
-        Authorization: "Bearer " + token
-      }
-    });
-
-    const data = await res.json();
-    console.log("API RESPONSE:", data);
-
-    if (!data.success) {
-      console.log("Auth failed — but not logging out");
-      return;
+    if (!token) {
+      window.location.href = "/";
     }
 
-    document.getElementById("welcome").innerText =
-      "Welcome, " + data.user.username;
+    async function loadUser() {
+      try {
+        const res = await fetch(API + "/api/me", {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        });
 
-    document.getElementById("username").innerText =
-      data.user.username;
+        const data = await res.json();
+        console.log("API RESPONSE:", data);
 
-  } catch (err) {
-    console.log("Fetch error:", err);
-  }
-}
+        if (!data.success) {
+          console.log("Auth failed");
+          return;
+        }
 
-loadUser();
+        document.getElementById("username").innerText = data.user.username;
+        document.getElementById("usernameDisplay").innerText = data.user.username;
+        document.getElementById("welcome").innerText =
+          "Welcome, " + data.user.username;
 
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "/";
-}
-</script>
+      } catch (err) {
+        console.log("Fetch error:", err);
+      }
+    }
+
+    loadUser();
+
+    async function changePassword() {
+      const newPassword = document.getElementById("newPassword").value;
+
+      const res = await fetch(API + "/api/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: JSON.stringify({ newPassword })
+      });
+
+      const data = await res.json();
+
+      document.getElementById("msg").innerText = data.message;
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+  </script>
+
 </body>
 </html>
