@@ -10,22 +10,6 @@ async function getDB() {
   return connection;
 }
 
-// ✅ FIXED TOKEN READER
-function verifyToken(req) {
-  const auth =
-    req.headers.authorization ||
-    req.headers.Authorization;
-
-  if (!auth) return null;
-
-  try {
-    const token = auth.split(" ")[1];
-    return jwt.verify(token, process.env.JWT_SECRET);
-  } catch {
-    return null;
-  }
-}
-
 export default async function handler(req, res) {
   try {
     const db = await getDB();
@@ -34,19 +18,6 @@ export default async function handler(req, res) {
     // ================= REGISTER =================
     if (req.method === "POST" && path.includes("/register")) {
       const { username, password } = req.body;
-
-      if (!username || !password) {
-        return res.json({ success: false, message: "Fill all fields" });
-      }
-
-      const [existing] = await db.execute(
-        "SELECT id FROM users WHERE username = ?",
-        [username]
-      );
-
-      if (existing.length > 0) {
-        return res.json({ success: false, message: "User exists" });
-      }
 
       const hashed = await bcrypt.hash(password, 10);
 
@@ -84,40 +55,58 @@ export default async function handler(req, res) {
         { expiresIn: "1h" }
       );
 
-      return res.json({ success: true, message: "Login success", token });
+      return res.json({ success: true, token });
     }
 
-    // ================= GET USER =================
+    // ================= 🔥 FIXED /me =================
     if (req.method === "GET" && path.includes("/me")) {
-      const user = verifyToken(req);
+      const auth = req.headers.authorization;
 
-      if (!user) {
-        return res.json({ success: false });
+      console.log("AUTH HEADER:", auth);
+
+      if (!auth) {
+        return res.json({ success: false, message: "No token" });
       }
 
-      return res.json({ success: true, user });
+      try {
+        const token = auth.split(" ")[1];
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        return res.json({
+          success: true,
+          user: decoded
+        });
+
+      } catch (err) {
+        console.log("JWT ERROR:", err);
+        return res.json({ success: false, message: "Invalid token" });
+      }
     }
 
     // ================= CHANGE PASSWORD =================
     if (req.method === "POST" && path.includes("/change-password")) {
-      const user = verifyToken(req);
+      const auth = req.headers.authorization;
 
-      if (!user) {
-        return res.json({ success: false, message: "Unauthorized" });
+      if (!auth) {
+        return res.json({ success: false });
       }
+
+      const token = auth.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       const { newPassword } = req.body;
       const hashed = await bcrypt.hash(newPassword, 10);
 
       await db.execute(
         "UPDATE users SET password = ? WHERE id = ?",
-        [hashed, user.id]
+        [hashed, decoded.id]
       );
 
       return res.json({ success: true, message: "Password updated" });
     }
 
-    return res.json({ success: false, message: "Not found" });
+    return res.json({ success: false });
 
   } catch (err) {
     console.error(err);
