@@ -69,69 +69,48 @@
   </div>
 
   <script>
-  const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
 
-  // 🔥 Detect environment
-  const API = "https://myapp-smoky-seven.vercel.app"; 
+// ✅ ALWAYS use real API
+const API = "https://myapp-smoky-seven.vercel.app";
 
-  if (!token) {
-    window.location.href = "/";
-  }
+if (!token) {
+  window.location.href = "/";
+}
 
-  // 🔥 LOAD USER
-  async function loadUser() {
-    try {
-      const res = await fetch(API + "/api/me", {
-        headers: {
-          Authorization: "Bearer " + token
-        }
-      });
-
-      const data = await res.json();
-      console.log("API:", data);
-
-      if (!data.success) {
-        console.log("Auth failed");
-        return; // ❌ don't logout instantly
-      }
-
-      document.getElementById("welcome").innerText =
-        "Welcome, " + data.user.username;
-
-      document.getElementById("username").innerText =
-        data.user.username;
-
-    } catch (err) {
-      console.log("Error:", err);
-    }
-  }
-
-  loadUser();
-
-  // 🔐 CHANGE PASSWORD
-  async function changePassword() {
-    const newPassword = document.getElementById("newPassword").value;
-
-    const res = await fetch(API + "/api/change-password", {
-      method: "POST",
+async function loadUser() {
+  try {
+    const res = await fetch(API + "/api/me", {
       headers: {
-        "Content-Type": "application/json",
         Authorization: "Bearer " + token
-      },
-      body: JSON.stringify({ newPassword })
+      }
     });
 
     const data = await res.json();
+    console.log("API RESPONSE:", data);
 
-    document.getElementById("msg").innerText = data.message;
-  }
+    if (!data.success) {
+      console.log("Auth failed — but not logging out");
+      return;
+    }
 
-  // 🚪 LOGOUT
-  function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "/";
+    document.getElementById("welcome").innerText =
+      "Welcome, " + data.user.username;
+
+    document.getElementById("username").innerText =
+      data.user.username;
+
+  } catch (err) {
+    console.log("Fetch error:", err);
   }
+}
+
+loadUser();
+
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "/";
+}
 </script>
-
 </body>
 </html>
