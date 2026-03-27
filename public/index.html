@@ -1,87 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Auth System</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Auth App</title>
 </head>
-
 <body>
+  <h2>Register</h2>
+  <input id="regUser" placeholder="Username">
+  <input id="regPass" type="password" placeholder="Password">
+  <button onclick="register()">Register</button>
 
-<div class="wrapper">
+  <h2>Login</h2>
+  <input id="logUser" placeholder="Username">
+  <input id="logPass" type="password" placeholder="Password">
+  <button onclick="login()">Login</button>
 
-  <div class="card">
+  <p id="response"></p>
 
-    <!-- LOGO / TITLE -->
-    <div class="header">
-      <h1>MyApp</h1>
-      <p>Welcome back 👋</p>
-    </div>
+  <script>
+    async function register() {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          username: document.getElementById("regUser").value,
+          password: document.getElementById("regPass").value
+        })
+      });
 
-    <!-- REGISTER -->
-    <div id="registerBox">
-      <input id="regUser" placeholder="Username">
-      <input id="regPass" type="password" placeholder="Password">
-      <button onclick="register()">Create Account</button>
-      <div class="switch" onclick="showLogin()">Already have an account?</div>
-    </div>
+      document.getElementById("response").innerText = await res.text();
+    }
 
-    <!-- LOGIN -->
-    <div id="loginBox" class="hidden">
-      <input id="logUser" placeholder="Username">
-      <input id="logPass" type="password" placeholder="Password">
-      <button onclick="login()">Login</button>
-      <div class="switch" onclick="showRegister()">Create account</div>
-    </div>
+    async function login() {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          username: document.getElementById("logUser").value,
+          password: document.getElementById("logPass").value
+        })
+      });
 
-    <div id="message" class="message"></div>
-
-  </div>
-
-</div>
-
-<script>
-function showLogin() {
-  registerBox.classList.add("hidden");
-  loginBox.classList.remove("hidden");
-}
-
-function showRegister() {
-  loginBox.classList.add("hidden");
-  registerBox.classList.remove("hidden");
-}
-
-function register() {
-  fetch("/register", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username: regUser.value,
-      password: regPass.value
-    })
-  })
-  .then(res => res.text())
-  .then(data => {
-    message.innerText = data;
-    message.style.color = data.includes("❌") ? "#ef4444" : "#10b981";
-  });
-}
-
-function login() {
-  fetch("/login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      username: logUser.value,
-      password: logPass.value
-    })
-  })
-  .then(res => res.text())
-  .then(data => {
-    message.innerText = data;
-    message.style.color = data.includes("❌") ? "#ef4444" : "#10b981";
-  });
-}
-</script>
-
+      document.getElementById("response").innerText = await res.text();
+    }
+  </script>
 </body>
 </html>
