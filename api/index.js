@@ -7,13 +7,8 @@ let connection;
 async function getDB() {
   if (connection) return connection;
 
-  // ✅ Always use DATABASE_URL (recommended)
-  connection = await mysql.createConnection({
-    uri: process.env.DATABASE_URL,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
+  // ✅ CORRECT WAY
+  connection = await mysql.createConnection(process.env.DATABASE_URL);
 
   return connection;
 }
@@ -116,7 +111,7 @@ export default async function handler(req, res) {
 
     return res.status(500).json({
       success: false,
-      message: err.message, // 👈 shows real error (important)
+      message: err.message,
     });
   }
 }
