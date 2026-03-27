@@ -69,25 +69,33 @@
   </div>
 
   <script>
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if (!token) {
-      window.location.href = "/";
-    }
+  // 🔥 Detect environment
+  const API =
+    window.location.hostname === "127.0.0.1"
+      ? "https://your-vercel-app.vercel.app" // 👈 CHANGE THIS
+      : "";
 
-    // 🔥 LOAD USER DATA FROM API
-    async function loadUser() {
-      const res = await fetch("/api/me", {
+  if (!token) {
+    window.location.href = "/";
+  }
+
+  // 🔥 LOAD USER
+  async function loadUser() {
+    try {
+      const res = await fetch(API + "/api/me", {
         headers: {
           Authorization: "Bearer " + token
         }
       });
 
       const data = await res.json();
+      console.log("API:", data);
 
       if (!data.success) {
-        logout();
-        return;
+        console.log("Auth failed");
+        return; // ❌ don't logout instantly
       }
 
       document.getElementById("welcome").innerText =
@@ -95,35 +103,38 @@
 
       document.getElementById("username").innerText =
         data.user.username;
+
+    } catch (err) {
+      console.log("Error:", err);
     }
+  }
 
-    loadUser();
+  loadUser();
 
-    // 🔐 CHANGE PASSWORD
-    async function changePassword() {
-      const newPassword = document.getElementById("newPassword").value;
+  // 🔐 CHANGE PASSWORD
+  async function changePassword() {
+    const newPassword = document.getElementById("newPassword").value;
 
-      const res = await fetch("/api/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token
-        },
-        body: JSON.stringify({ newPassword })
-      });
+    const res = await fetch(API + "/api/change-password", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ newPassword })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      const msg = document.getElementById("msg");
-      msg.innerText = data.message;
-    }
+    document.getElementById("msg").innerText = data.message;
+  }
 
-    // 🚪 LOGOUT
-    function logout() {
-      localStorage.removeItem("token");
-      window.location.href = "/";
-    }
-  </script>
+  // 🚪 LOGOUT
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  }
+</script>
 
 </body>
 </html>
