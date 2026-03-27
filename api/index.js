@@ -1,37 +1,21 @@
 const express = require("express");
 const mysql = require("mysql2");
-const bodyParser = require("body-parser");
+const bcrypt = require("bcryptjs"); 
 const cors = require("cors");
-const bcrypt = require("bcrypt");
-const path = require("path");
 
 const app = express();
 
-// ✅ MIDDLEWARE
+// middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use(express.static(__dirname)); // serve HTML + CSS
+app.use(express.json());
 
-// 🔗 DATABASE CONNECTION (uses env for deployment)
-const db = mysql.createConnection({
-  host: process.env.DB_HOST || "shinkansen.proxy.rlwy.net",
-  port: process.env.DB_PORT || 36307,
-  user: process.env.DB_USER || "appuser",
-  password: process.env.DB_PASSWORD || "mypassword",
-  database: process.env.DB_NAME || "railway"
-});
-
-db.connect(err => {
-  if (err) {
-    console.log("❌ DB connection failed:", err);
-  } else {
-    console.log("✅ Connected to MySQL");
-  }
-});
-
-// 🏠 HOME ROUTE
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+// ✅ MySQL connection pool
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 // 🔐 REGISTER
@@ -46,7 +30,7 @@ app.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const sql = "INSERT INTO users (username, password) VALUES (?, ?)";
-    db.query(sql, [username, hashedPassword], (err, result) => {
+    db.query(sql, [username, hashedPassword], (err) => {
       if (err) {
         console.log(err);
         return res.send("❌ Error registering user");
@@ -55,6 +39,7 @@ app.post("/register", async (req, res) => {
     });
 
   } catch (err) {
+    console.log(err);
     res.send("❌ Error hashing password");
   }
 });
@@ -69,7 +54,10 @@ app.post("/login", (req, res) => {
 
   const sql = "SELECT * FROM users WHERE username = ?";
   db.query(sql, [username], async (err, result) => {
-    if (err) return res.send("❌ DB error");
+    if (err) {
+      console.log(err);
+      return res.send("❌ DB error");
+    }
 
     if (result.length === 0) {
       return res.send("❌ User not found");
@@ -87,9 +75,4 @@ app.post("/login", (req, res) => {
   });
 });
 
-// 🚀 SERVER (dynamic port for deployment)
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+module.exports = app;
