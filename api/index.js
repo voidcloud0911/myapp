@@ -2,24 +2,18 @@ import mysql from "mysql2/promise";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-// ✅ Reuse connection across requests (important for Vercel)
 let connection;
 
 async function getDB() {
   if (connection) return connection;
 
-  if (process.env.DATABASE_URL) {
-    connection = await mysql.createConnection(process.env.DATABASE_URL);
-  } else {
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      port: process.env.DB_PORT,
-      ssl: { rejectUnauthorized: false },
-    });
-  }
+  // ✅ Always use DATABASE_URL (recommended)
+  connection = await mysql.createConnection({
+    uri: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  });
 
   return connection;
 }
@@ -29,9 +23,7 @@ export default async function handler(req, res) {
     const db = await getDB();
     const { method, url } = req;
 
-    // ============================
-    // 🔐 REGISTER
-    // ============================
+    // ================= REGISTER =================
     if (method === "POST" && url.includes("/register")) {
       const { username, password } = req.body;
 
@@ -67,9 +59,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // ============================
-    // 🔑 LOGIN
-    // ============================
+    // ================= LOGIN =================
     if (method === "POST" && url.includes("/login")) {
       const { username, password } = req.body;
 
@@ -116,9 +106,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // ============================
-    // ❌ NOT FOUND
-    // ============================
     return res.status(404).json({
       success: false,
       message: "Route not found",
@@ -129,7 +116,7 @@ export default async function handler(req, res) {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: err.message, // 👈 shows real error (important)
     });
   }
 }
