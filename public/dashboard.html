@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+
+  <div class="dashboard-container">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <h2 class="logo">MyApp</h2>
+
+      <nav>
+        <a href="#" class="active">🏠 Dashboard</a>
+        <a href="#">👤 Profile</a>
+        <a href="#">⚙️ Settings</a>
+      </nav>
+
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <header class="topbar">
+        <h1>Dashboard</h1>
+        <p id="welcome"></p>
+      </header>
+
+      <section class="cards">
+
+        <div class="card">
+          <h3>Users</h3>
+          <p>1</p>
+        </div>
+
+        <div class="card">
+          <h3>Status</h3>
+          <p>Active</p>
+        </div>
+
+        <div class="card">
+          <h3>Plan</h3>
+          <p>Free</p>
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/";
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      document.getElementById("welcome").innerText =
+        "Welcome, " + payload.username;
+    } catch {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "/";
+    }
+  </script>
+
+</body>
+</html>
