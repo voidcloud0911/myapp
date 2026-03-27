@@ -10,8 +10,12 @@ async function getDB() {
   return connection;
 }
 
+// ✅ FIXED TOKEN READER
 function verifyToken(req) {
-  const auth = req.headers.authorization;
+  const auth =
+    req.headers.authorization ||
+    req.headers.Authorization;
+
   if (!auth) return null;
 
   try {
@@ -80,11 +84,7 @@ export default async function handler(req, res) {
         { expiresIn: "1h" }
       );
 
-      return res.json({
-        success: true,
-        message: "Login success",
-        token
-      });
+      return res.json({ success: true, message: "Login success", token });
     }
 
     // ================= GET USER =================
