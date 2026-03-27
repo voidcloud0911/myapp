@@ -21,20 +21,28 @@ body {
   width: 240px;
   background: #020617;
   padding: 20px;
+
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; /* keeps logout bottom */
+}
+
+/* TOP NAV */
+.sidebar nav {
+  margin-top: 20px;
 }
 
 .logo {
-  margin-bottom: 30px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
+/* NAV LINKS */
 .sidebar nav a {
   display: block;
   color: #94a3b8;
   margin-bottom: 10px;
-  padding: 10px;
+  padding: 12px;
   border-radius: 8px;
   text-decoration: none;
   transition: 0.3s;
@@ -51,10 +59,10 @@ body {
 
 /* LOGOUT */
 .logout-btn {
-  padding: 10px;
+  padding: 12px;
   background: #ef4444;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   color: white;
   cursor: pointer;
 }
@@ -70,6 +78,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: 10px;
 }
 
 .avatar {

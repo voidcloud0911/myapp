@@ -16,15 +16,21 @@
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2 class="logo">🚀 MyApp</h2>
 
-    <nav>
-      <a href="#" class="active" onclick="showSection('dashboard', this)">Dashboard</a>
-      <a href="#" onclick="showSection('profile', this)">Profile</a>
-      <a href="#" onclick="showSection('settings', this)">Settings</a>
-    </nav>
+    <!-- TOP -->
+    <div>
+      <h2 class="logo">🚀 MyApp</h2>
 
+      <nav>
+        <a href="#" class="active" onclick="showSection('dashboard', this)">Dashboard</a>
+        <a href="#" onclick="showSection('profile', this)">Profile</a>
+        <a href="#" onclick="showSection('settings', this)">Settings</a>
+      </nav>
+    </div>
+
+    <!-- BOTTOM -->
     <button onclick="logout()" class="logout-btn">Logout</button>
+
   </aside>
 
   <!-- MAIN -->
@@ -43,7 +49,7 @@
       </div>
     </header>
 
-    <!-- DASHBOARD SECTION -->
+    <!-- DASHBOARD -->
     <div id="dashboardSection">
       <section class="cards">
         <div class="card">
@@ -75,7 +81,7 @@
       </section>
     </div>
 
-    <!-- PROFILE SECTION -->
+    <!-- PROFILE -->
     <div id="profileSection" style="display:none;">
       <section class="profile">
         <h2>Profile</h2>
@@ -85,7 +91,7 @@
       </section>
     </div>
 
-    <!-- SETTINGS SECTION -->
+    <!-- SETTINGS -->
     <div id="settingsSection" style="display:none;">
       <section class="profile">
         <h2>Settings</h2>
@@ -141,22 +147,19 @@ function logout() {
 }
 
 // NAVIGATION
-function showSection(section, element) {
+function showSection(section, el) {
   document.getElementById("dashboardSection").style.display = "none";
   document.getElementById("profileSection").style.display = "none";
   document.getElementById("settingsSection").style.display = "none";
 
   document.getElementById(section + "Section").style.display = "block";
 
-  document.querySelectorAll(".sidebar nav a").forEach(link => {
-    link.classList.remove("active");
-  });
-
-  element.classList.add("active");
+  document.querySelectorAll(".sidebar nav a").forEach(a => a.classList.remove("active"));
+  el.classList.add("active");
 }
 
 // CHARTS
-new Chart(document.getElementById("lineChart"), {
+new Chart(lineChart, {
   type: "line",
   data: {
     labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
@@ -169,7 +172,7 @@ new Chart(document.getElementById("lineChart"), {
   }
 });
 
-new Chart(document.getElementById("barChart"), {
+new Chart(barChart, {
   type: "bar",
   data: {
     labels: ["Logins","Actions","Updates"],
