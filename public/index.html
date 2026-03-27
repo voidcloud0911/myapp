@@ -1,21 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Auth App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Register</h2>
-  <input id="regUser" placeholder="Username">
-  <input id="regPass" type="password" placeholder="Password">
-  <button onclick="register()">Register</button>
 
-  <h2>Login</h2>
-  <input id="logUser" placeholder="Username">
-  <input id="logPass" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
+  <div class="wrapper">
+    <div class="card">
 
-  <p id="response"></p>
+      <div class="header">
+        <h1>Welcome</h1>
+        <p>Create an account or login</p>
+      </div>
+
+      <!-- REGISTER -->
+      <input id="regUser" placeholder="Username">
+      <input id="regPass" type="password" placeholder="Password">
+      <button onclick="register()">Create Account</button>
+
+      <div class="divider">or</div>
+
+      <!-- LOGIN -->
+      <input id="logUser" placeholder="Username">
+      <input id="logPass" type="password" placeholder="Password">
+      <button class="secondary" onclick="login()">Login</button>
+
+      <p id="response" class="message"></p>
+
+    </div>
+  </div>
 
   <script>
     async function register() {
@@ -28,7 +49,11 @@
         })
       });
 
-      document.getElementById("response").innerText = await res.text();
+      const data = await res.json(); // ✅ FIXED
+      const message = document.getElementById("response");
+
+      message.innerText = data.message;
+      message.className = "message " + (data.success ? "success" : "error");
     }
 
     async function login() {
@@ -41,8 +66,21 @@
         })
       });
 
-      document.getElementById("response").innerText = await res.text();
+      const data = await res.json(); // ✅ FIXED
+      const message = document.getElementById("response");
+
+      message.innerText = data.message;
+      message.className = "message " + (data.success ? "success" : "error");
+
+      // ✅ Save token
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+
+        // optional redirect
+        // window.location.href = "/dashboard.html";
+      }
     }
   </script>
+
 </body>
 </html>

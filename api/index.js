@@ -1,71 +1,73 @@
-const express = require("express");
-const mysql = require("mysql2");
-const bcrypt = require("bcryptjs");
-const cors = require("cors");
+import mysql from "mysql2/promise";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const app = express();
+export default async function handler(req, res) {
+  const db = await mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+  });
 
-app.use(cors());
-app.use(express.json());
+  const { method, url } = req;
 
-// ✅ FIXED DB CONNECTION
-const db = mysql.createPool(process.env.DATABASE_URL);
+  // ================= REGISTER =================
+  if (method === "POST" && url.includes("/register")) {
+    const { username, password } = req.body;
 
-// 🔐 REGISTER
-app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.send("❌ Please fill all fields");
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const sql = "INSERT INTO users (username, password) VALUES (?, ?)";
-    db.query(sql, [username, hashedPassword], (err) => {
-      if (err) {
-        console.error("REGISTER ERROR:", err);
-        return res.send("❌ Error registering user");
-      }
-      res.send("✅ User registered");
-    });
-
-  } catch (err) {
-    console.error("HASH ERROR:", err);
-    res.send("❌ Error hashing password");
-  }
-});
-
-// 🔑 LOGIN
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
-
-  if (!username || !password) {
-    return res.send("❌ Please fill all fields");
-  }
-
-  const sql = "SELECT * FROM users WHERE username = ?";
-  db.query(sql, [username], async (err, result) => {
-    if (err) {
-      console.error("LOGIN ERROR:", err);
-      return res.send("❌ DB error");
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
     }
 
+    const [existing] = await db.execute(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ success: false, message: "User exists" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    await db.execute(
+      "INSERT INTO users (username, password) VALUES (?, ?)",
+      [username, hashed]
+    );
+
+    return res.json({ success: true, message: "Registered successfully" });
+  }
+
+  // ================= LOGIN =================
+  if (method === "POST" && url.includes("/login")) {
+    const { username, password } = req.body;
+
+    const [result] = await db.execute(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
+    );
+
     if (result.length === 0) {
-      return res.send("❌ User not found");
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const user = result[0];
 
     const match = await bcrypt.compare(password, user.password);
 
-    if (match) {
-      res.send("✅ Login successful");
-    } else {
-      res.send("❌ Wrong password");
+    if (!match) {
+      return res.status(401).json({ success: false, message: "Wrong password" });
     }
-  });
-});
 
-module.exports = app;
+    const token = jwt.sign(
+      { id: user.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return res.json({ success: true, message: "Login successful", token });
+  }
+
+  return res.status(404).json({ message: "Not found" });
+}
