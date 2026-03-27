@@ -6,16 +6,16 @@
 }
 
 body {
-  background: #f4f6f9;
+  background: #f3f4f6;
 }
 
-/* LAYOUT */
-.dashboard-container {
+/* Layout */
+.dashboard {
   display: flex;
   height: 100vh;
 }
 
-/* SIDEBAR */
+/* Sidebar */
 .sidebar {
   width: 220px;
   background: #111827;
@@ -35,40 +35,39 @@ body {
   color: #9ca3af;
   text-decoration: none;
   margin-bottom: 15px;
-  transition: 0.3s;
 }
 
-.sidebar nav a:hover,
-.sidebar nav .active {
+.sidebar nav a.active,
+.sidebar nav a:hover {
   color: white;
   font-weight: 600;
 }
 
 .logout-btn {
-  padding: 10px;
-  border: none;
   background: #ef4444;
+  border: none;
+  padding: 10px;
   color: white;
   border-radius: 6px;
   cursor: pointer;
 }
 
-/* MAIN */
+/* Main */
 .main {
   flex: 1;
   padding: 30px;
 }
 
-/* TOPBAR */
-.topbar {
+/* Header */
+.top {
   margin-bottom: 20px;
 }
 
-.topbar p {
+.top p {
   color: #6b7280;
 }
 
-/* CARDS */
+/* Cards */
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -79,15 +78,14 @@ body {
   background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .card h3 {
   margin-bottom: 10px;
-  color: #374151;
 }
 
 .card p {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 600;
 }

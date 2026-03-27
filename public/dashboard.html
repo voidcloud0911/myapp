@@ -13,34 +13,36 @@
 </head>
 <body>
 
-  <div class="dashboard-container">
+  <div class="dashboard">
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <h2 class="logo">MyApp</h2>
 
       <nav>
-        <a href="#" class="active">🏠 Dashboard</a>
-        <a href="#">👤 Profile</a>
-        <a href="#">⚙️ Settings</a>
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Profile</a>
+        <a href="#">Settings</a>
       </nav>
 
-      <button class="logout-btn" onclick="logout()">Logout</button>
+      <button onclick="logout()" class="logout-btn">Logout</button>
     </aside>
 
-    <!-- MAIN -->
+    <!-- MAIN CONTENT -->
     <main class="main">
 
-      <header class="topbar">
+      <!-- TOP -->
+      <header class="top">
         <h1>Dashboard</h1>
         <p id="welcome"></p>
       </header>
 
+      <!-- CARDS -->
       <section class="cards">
 
         <div class="card">
-          <h3>Users</h3>
-          <p>1</p>
+          <h3>Welcome</h3>
+          <p>You are logged in 🎉</p>
         </div>
 
         <div class="card">
@@ -50,7 +52,7 @@
 
         <div class="card">
           <h3>Plan</h3>
-          <p>Free</p>
+          <p>Free Tier</p>
         </div>
 
       </section>
@@ -62,19 +64,24 @@
   <script>
     const token = localStorage.getItem("token");
 
+    // ❌ No token → redirect
     if (!token) {
       window.location.href = "/";
     }
 
     try {
+      // ✅ Decode JWT
       const payload = JSON.parse(atob(token.split(".")[1]));
+
       document.getElementById("welcome").innerText =
         "Welcome, " + payload.username;
-    } catch {
+
+    } catch (err) {
       localStorage.removeItem("token");
       window.location.href = "/";
     }
 
+    // 🚪 Logout
     function logout() {
       localStorage.removeItem("token");
       window.location.href = "/";
